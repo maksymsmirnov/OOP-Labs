@@ -1,0 +1,112 @@
+package com.company;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Iterator;
+
+public class MyArrayList implements Serializable, Iterable {
+
+    private int size = 0;
+    public String elementData[] = {};
+
+    public MyArrayList() {}
+
+    public void add(String income) {
+        if (size == elementData.length) {
+            ensureCapacity();
+        }
+        elementData[size++] = income;
+    }
+
+    public String remove(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size "
+                    + index);
+        }
+        String removedElement = elementData[index];
+
+        for (int i = index; i < size - 1; i++) {
+            elementData[i] = elementData[i + 1];
+        }
+        elementData = Arrays.copyOf(elementData, size - 1);
+        size--;
+        return removedElement;
+    }
+
+    public void clear() {
+        elementData = null;
+        size = 0;
+    }
+
+    boolean contains(String tmp) {
+        for (int i = 0; i < size; i++) {
+            if (elementData[i].equals(tmp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsAll(MyArrayList tmp) {
+        for (int i = 0; i < size; i++) {
+            if (!tmp.contains(elementData[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String[] toArray() {
+        return elementData;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(elementData);
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private void ensureCapacity() {
+        int newIncreasedCapacity = elementData.length + 1;
+        elementData = Arrays.copyOf(elementData, newIncreasedCapacity);
+    }
+
+    @Override
+    public MyIterator iterator() {
+        return new MyIterator();
+    }
+
+    public class MyIterator implements Iterator {
+        private int position = -1;
+
+        public boolean hasNext() {
+            if (position + 1 < elementData.length){
+                position++;
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        public String next() {
+            return elementData[position];
+        }
+
+//        public void remove() {
+//            String[] massive = new String[--size];
+//            int j = 0;
+//
+//            for (int i = 0; i < elementData.length; i++) {
+//                if (i != position) {
+//                    massive[j++] = elementData[i];
+//                }
+//            }
+//
+//            elementData = massive;
+//        }
+    }
+
+}

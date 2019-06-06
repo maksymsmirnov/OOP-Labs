@@ -1,0 +1,188 @@
+package com.company;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+    public class Vivod {
+        public static void Vivod(){
+            ArrayList list1 = new ArrayList();
+
+
+            String ch=null;
+            Scanner num=new Scanner(System.in);
+            String i=null;
+            int q = 0;
+            System.out.print("a. введення даних;\n" +
+                    "b. перегляд даних;\n" +
+                    "c. виконання обчислень;\n" +
+                    "d. відображення результату;\n" +
+                    "e. завершення програми і т.д.");
+            do{
+                ch=num.nextLine();
+                if(ch.equals("a")){
+
+                    i=num.nextLine();
+
+                    list1.add(i);
+                    System.out.print("a. введення даних;\n" +
+                            "b. перегляд даних;\n" +
+                            "c. виконання обчислень;\n" +
+                            "d. відображення результату;\n" +
+                            "e. завершення програми і т.д.");
+                }
+                if(ch.equals("b")){
+                    System.out.println("My string is: "+ i);
+                    System.out.print("a. введення даних;\n" +
+                            "b. перегляд даних;\n" +
+                            "c. виконання обчислень;\n" +
+                            "d. відображення результату;\n" +
+                            "e. завершення програми і т.д.");
+                }
+                if(ch.equals("c")){
+                    System.out.print("a. введення даних;\n" +
+                            "b. перегляд даних;\n" +
+                            "c. виконання обчислень;\n" +
+                            "d. відображення результату;\n" +
+                            "e. завершення програми і т.д.");
+                }
+                if(ch.equals("d")){
+                    q =Main.NumberOfLines(i);
+                    Main.NumberOfLetters(i,q);
+                    System.out.print("a. введення даних;\n" +
+                            "b. перегляд даних;\n" +
+                            "c. виконання обчислень;\n" +
+                            "d. відображення результату;\n" +
+                            "e. завершення програми і т.д.");
+                }
+
+            }while(!ch.equals("e"));
+        }
+    }
+
+package com.company;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+//import static com.company.MyArrayList.add;
+
+public class Main {
+    public static void help(){
+        System.out.println("Author:Maxim Smirnov");
+        System.out.println("Ввести текст. Визначити та вивести, яких літер (голосних чи\n" +
+                "приголосних) більше в кожному реченні тексту. Результат вивести у\n" +
+                "вигляді таблиці.");
+    }
+    public static int NumberOfLines(String n){
+        int num=0;
+        for(int i=0;i<n.length();i++){
+            if(n.charAt(i)=='.'){
+                num++;
+            }
+        }
+        return num;
+    }
+    public static void NumberOfLetters(String n,int q ){
+        int sum1=0;
+        int sum2=0;
+        int jsum=0;
+        int []ArrayVowels=new int[q];
+        int []ArrayConsonant=new int[q];
+        for(int i=0;i<q;i++){
+            for( ;n.charAt(jsum)!='.';jsum++){
+                // jsum++;
+                if(n.charAt(jsum)=='a'||n.charAt(jsum)=='o'||n.charAt(jsum)=='i'||n.charAt(jsum)=='e'||n.charAt(jsum)=='u'){
+                    sum1++;
+                }
+                else{
+                    sum2++;
+                }
+            }
+            ArrayVowels[i]=sum1;
+            ArrayConsonant[i]=sum2;
+            sum1=0;
+            sum2=0;
+            jsum++;
+        }
+        for(int i=0;i<q;i++){
+            System.out.println(ArrayVowels[i]);
+        }
+        for(int i=0;i<q;i++){
+            System.out.println(ArrayConsonant[i]);
+        }
+        for(int i=0;i<q;i++){
+            if(ArrayVowels[i]>ArrayConsonant[i]){
+                System.out.println(i+")More vowels than consonants");
+            }
+            else{
+                System.out.println(i+")More consonants than vowels");
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+            public static void main(String[] args) throws IOException, ClassNotFoundException {
+               Vivod.Vivod();
+                FileOutputStream fos = new FileOutputStream("temp.out");
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                ArrayList ts = new ArrayList();
+                ts.add("new element 1");
+                ts.add("new element 2");
+                ts.add("new element 3");
+                try {
+                    oos.writeObject(ts);
+                    oos.flush();
+                    oos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                FileInputStream fis = new FileInputStream("temp.out");
+                ObjectInputStream oin = new ObjectInputStream(fis);
+                ArrayList ts_new = (ArrayList) oin.readObject();
+                System.out.println(ts_new);
+
+                ArrayList list = new ArrayList();
+
+                list.add("asd.");
+                list.add("fgh.");
+                list.add("jkl.");
+
+                System.out.println(list.size());
+
+                list.remove(0);
+                System.out.println(list.size());
+                System.out.println(list);
+
+                Iterator iter = (Iterator) list.iterator();
+
+                while (iter.hasNext()) {
+                    System.out.println("+");
+                }
+
+                for (Object tmp : list) {
+                    System.out.println(tmp);
+                }
+
+            }
+        }
+
+
+
+
+
+        //  Scanner num=new Scanner(System.in);
+        // String i=num.nextLine();
+        //System.out.println("My string is: "+ i);
+        // int q = NumberOfLines(i);
+        // System.out.println(q);
+        // NumberOfLetters(i,q);
+
+

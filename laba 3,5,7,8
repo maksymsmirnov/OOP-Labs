@@ -1,0 +1,620 @@
+package sample.controllers;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import sample.Model.SimpleBureau;
+import sample.Model.person.Person;
+
+public class TableMenuController {
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+
+    @FXML
+    TableView<Person> clientTable;
+
+    @FXML
+    private TableColumn<Person, String> registrationNumberColumn;
+
+    @FXML
+    private TableColumn<Person, String> clientName;
+
+    @FXML
+    private Label name;
+
+    @FXML
+    private Label age;
+
+    @FXML
+    private Label sex;
+
+    @FXML
+    private Button exitButton;
+
+    @FXML
+    private Button addButton;
+
+    @FXML
+    private Button removeButton;
+
+    private SimpleBureau bureau = new SimpleBureau();
+
+    private Stage TableMenuStage;
+
+    @FXML
+    void initialize() {
+        exitButton.setOnAction(event -> {
+            exitButton.getScene().getWindow().hide();
+        });
+
+        clientTable.setItems(bureau.getClients());
+
+        registrationNumberColumn.setCellValueFactory(new PropertyValueFactory<>("registrationNumber"));
+        clientName.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        clientTable.getSelectionModel().selectedItemProperty().addListener((
+                (observable, oldValue, newValue) -> showClienDetails(newValue))
+        );
+
+
+        addButton.setOnAction(event -> {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/sample/addForm.fxml"));
+
+            try {
+                loader.load();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Parent root = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(TableMenuStage);
+            stage.setTitle("Bureau");
+            addFormController addformController = loader.getController();
+            addformController.setAddFormStage(stage);
+            addformController.setBureau(bureau);
+            stage.showAndWait();
+        });
+
+    }
+
+
+    @FXML
+    private void handleDeletePerson() {
+        int selectedIndex = clientTable.getSelectionModel().getSelectedIndex();
+        if(selectedIndex >= 0)
+            clientTable.getItems().remove(selectedIndex);
+        else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(TableMenuStage);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Person Selected");
+            alert.setContentText("Please select a person in the table.");
+
+            alert.showAndWait();
+        }
+    }
+
+    private void showClienDetails(Person client){
+        if(client != null){
+            name.setText(client.getName());
+            age.setText(client.getAge().getValue());
+            sex.setText(client.getSex().getValue());
+        }
+        else {
+            name.setText("");
+            age.setText("");
+            sex.setText("");
+        }
+    }
+
+    public void setTableMenuStage(Stage tableMenuStage) {
+        this.TableMenuStage = tableMenuStage;
+    }
+}
+package sample.controllers;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
+
+public class MainController {
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private Button exitButton;
+
+    @FXML
+    private Button showButton;
+
+    @FXML
+    void initialize() {
+        showButton.setOnAction(event -> {
+            showButton.getScene().getWindow().hide();
+
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/sample/tableMenu.fxml"));
+
+
+            try {
+                loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Parent root = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setTitle("Menu");
+            stage.setScene(new Scene(root));
+            TableMenuController tableMenuController = loader.getController();
+            tableMenuController.setTableMenuStage(stage);
+            stage.showAndWait();
+        });
+
+        exitButton.setOnAction(event -> {
+            exitButton.getScene().getWindow().hide();
+        });
+
+    }
+}
+package sample.controllers;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import sample.CheckFieldUtil;
+import sample.Model.SimpleBureau;
+import sample.Model.person.Person;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class addFormController {
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private TextField nameTextField;
+
+    @FXML
+    private TextField sexTextField;
+
+    @FXML
+    private TextField ageTextField;
+
+    @FXML
+    private Button addButton;
+
+    @FXML
+    private Button cancelButton;
+
+    private Stage addFormStage;
+
+    private SimpleBureau bureau;
+
+    public void setAddFormStage(Stage addFormStage) {
+        this.addFormStage = addFormStage;
+    }
+
+    public void setBureau(SimpleBureau bureau) {
+        this.bureau = bureau;
+    }
+
+    @FXML
+    void initialize() {
+
+    }
+
+    @FXML
+    private void handleAdd(){
+        if(isInputValid()) {
+            bureau.getClients().add(new Person(sexTextField.getText(),
+                    nameTextField.getText(),
+                    Integer.parseInt(ageTextField.getText())));
+
+            addFormStage.close();
+        }
+    }
+
+    @FXML
+    private void handleClose(){
+        addFormStage.close();
+    }
+
+
+    private boolean isInputValid(){
+        StringBuilder errorMessage = new StringBuilder();
+
+        if (nameTextField.getText() == null || nameTextField.getText().length() == 0 ||
+                !CheckFieldUtil.checkName(nameTextField.getText())) {
+            errorMessage.append("No valid specialty!\n");
+        }
+        if (ageTextField.getText() == null || ageTextField.getText().length() == 0 ||
+                !CheckFieldUtil.checkAge(ageTextField.getText())) {
+            errorMessage.append("No valid experience!\n");
+        }
+        if (sexTextField.getText() == null || sexTextField.getText().length() == 0 ||
+                !CheckFieldUtil.checkSex(sexTextField.getText())) {
+            errorMessage.append("No valid education!\n");
+        }
+
+
+        if (errorMessage.toString().length() == 0) {
+            return true;
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initOwner(addFormStage);
+            alert.setTitle("Invalid Fields");
+            alert.setHeaderText("Please correct invalid fields");
+            alert.setContentText(errorMessage.toString());
+
+            alert.showAndWait();
+
+            return false;
+        }    }
+}
+package sample.Model;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import sample.Model.person.LonelyPerson;
+import sample.Model.person.Person;
+import sample.Model.person.PersonToFind;
+
+import javax.xml.bind.annotation.*;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@XmlRootElement(name = "Bureau")
+public class Bureau implements Serializable {
+    @XmlRootElement(name = "Client")
+    @XmlType(propOrder = { "client", "want", "numberOfRegistration", "dateOfRegistration" })
+
+    public static class Client implements Serializable {
+        private static final AtomicInteger id = new AtomicInteger(0);
+        private Person client;
+        private Person want;
+        private int numberOfRegistration;
+        private StringProperty registrationNumber;
+        private Date dateOfRegistration;
+
+
+        public Client(){}
+
+        public Client(LonelyPerson client, int year, int month, int day, PersonToFind want){
+            this.client = client;
+            this.dateOfRegistration = new Date(year, month, day);
+            this.want = want;
+            numberOfRegistration = id.getAndIncrement();
+            registrationNumber = new SimpleStringProperty(Integer.toString(numberOfRegistration));
+        }
+
+        private Client(int id){
+            numberOfRegistration = id;
+        }
+        @XmlElement
+        public Person getClient() {
+            return client;
+        }
+        @XmlElement
+        public Date getDateOfRegistration() {
+            return dateOfRegistration;
+        }
+
+        @XmlAttribute(name = "id")
+        public int getNumberOfRegistration() {
+            return numberOfRegistration;
+        }
+
+        public Person getWant() {
+            return want;
+        }
+
+        public void setWant(PersonToFind want){
+            this.want = want;
+        }
+
+        public void setClient(LonelyPerson client) {
+            this.client = client;
+        }
+
+        public void setNumberOfRegistration(int numberOfRegistration) {
+            this.numberOfRegistration = numberOfRegistration;
+        }
+
+        public void setDateOfRegistration(Date dateOfRegistration) {
+            this.dateOfRegistration = dateOfRegistration;
+        }
+
+        @Override
+        public String toString() {
+            return "client=" + client +
+                    ", want=" + want +
+                    ", numberOfRegistration= " + numberOfRegistration +
+                    ", dateOfRegistration= " + dateOfRegistration.getYear() + " " + (dateOfRegistration.getMonth() + 1) + " " + dateOfRegistration.getDate();
+        }
+
+        public boolean equals(Object other){
+            if(this == other) return true;
+            if(other == null) return false;
+            if(getClass() != other.getClass()) return false;
+
+            Client otherClient = (Client) other;
+
+            return numberOfRegistration == otherClient.numberOfRegistration;
+        }
+    }
+
+    @XmlElementWrapper
+    private ObservableList<Client> clients;
+
+    public Bureau(){
+        clients = FXCollections.observableArrayList();
+    }
+
+    public int size(){
+        return clients.size();
+    }
+
+    public void add(Client client){
+        clients.add(client);
+    }
+
+    public Client get(int index)throws ArrayIndexOutOfBoundsException{
+        return clients.get(index);
+    }
+
+    public ObservableList<Client> getClients() {
+        return clients;
+    }
+
+    public boolean remove(int numberOfRegistration){
+        Client client = new Client(numberOfRegistration);
+        return clients.remove(client);
+    }
+
+    @Override
+    public String toString() {
+        return "Bureau{" +
+                "clients=" + clients +
+                '}';
+    }
+
+    public int search(int numberOfRegistration){
+        Client client = new Client(numberOfRegistration);
+        for(int i = 0; i < clients.size(); i++){
+            if(clients.get(i).equals(client)) return i;
+        }
+        return -1;
+    }
+
+    public void sortByClientsAge(){
+        Collections.sort(clients, Comparator.comparingInt(c -> c.client.getAge()));
+    }
+
+    public void sort(){
+        Collections.sort(clients, Comparator.comparingInt(c -> c.numberOfRegistration));
+    }
+
+    public void sortByDateOfRegistration(){
+        Collections.sort(clients, Comparator.comparing(c -> c.dateOfRegistration));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return clients.equals(obj);
+    }
+}
+package sample.Model.person;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
+import java.util.Random;
+
+
+public class Person implements Serializable {
+    protected StringProperty sex;
+    protected StringProperty name;
+    protected StringProperty age;
+    protected EyeColor color;
+    private StringProperty registrationNumber;
+    private Random random = new Random();
+
+
+    public Person(){}
+
+    public Person(String sex){
+        this.sex = new SimpleStringProperty(sex);
+        this.registrationNumber = new SimpleStringProperty("№"+Math.abs((random.nextInt())%1000));
+    }
+
+    public Person(String sex, String name){
+        this(sex);
+        this.name = new SimpleStringProperty(name);
+    }
+
+    public Person(String sex, int age){
+        this(sex);
+        this.age = new SimpleStringProperty(Integer.toString(age));
+    }
+
+    public Person(String sex, String name, int age){
+        this(sex, age);
+        this.name = new SimpleStringProperty(name);
+    }
+
+    public Person(String sex, String age, EyeColor color){
+        this(sex, age);
+        this.color = color;
+    }
+
+    public Person(String sex, String name, int age, EyeColor color){
+        this(sex, name, age);
+        this.color = color;
+    }
+
+    @XmlElement
+    public StringProperty getSex() {
+        return sex;
+    }
+    @XmlElement
+    public String getName() {
+        return name.get();
+    }
+    @XmlElement
+    public StringProperty getAge() {
+        return age;
+    }
+    @XmlElement
+    public EyeColor getColor() {
+        return color;
+    }
+
+    public void setSex(StringProperty sex) {
+        this.sex = sex;
+    }
+
+    public void setName(StringProperty name) {
+        this.name = name;
+    }
+
+    public void setAge(StringProperty age) {
+        this.age = age;
+    }
+
+    public void setColor(EyeColor color) {
+        this.color = color;
+    }
+
+    public StringProperty getRegistrationNumberProperty() { return registrationNumber; }
+
+    public String getRegistrationNumber() { return registrationNumber.get(); }
+
+    public StringProperty getNameProperty() {return name;}
+
+
+
+    public boolean equals(Object obj){
+        if(this == obj) return true;
+        if(obj == null) return false;
+        if(getClass() != obj.getClass()) return false;
+
+        Person other = (Person) obj;
+
+        return name.equals(other.name) && sex.equals(other.sex) && color.equals(other.color) && age == other.age;
+    }
+
+
+}
+package sample.Model;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+
+public class DateUtil {
+
+    private static final String DATE_PATTERN = "dd.MM.yyyy";
+
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern(DATE_PATTERN);
+
+    public static String format(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return DATE_FORMATTER.format(date);
+    }
+
+    public static LocalDate parse(String dateString) {
+        try {
+            return DATE_FORMATTER.parse(dateString, LocalDate::from);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    public static boolean validDate(String dateString) {
+        // Try to parse the String.
+        return DateUtil.parse(dateString) != null;
+    }
+}
+package sample;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class CheckFieldUtil {
+
+    public static boolean checkSex(String str){
+        Pattern p = Pattern.compile("^men|women$", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean checkName(String str){
+        Pattern p = Pattern.compile("^[a-z|A-Z][a-z]{1,14}$");
+        Matcher m = p.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean checkAge(String str){
+        Pattern p = Pattern.compile("^?1[0-9]$");
+        Matcher m = p.matcher(str);
+        return m.matches();
+    }
+}
+package sample.Model.person;
+
+import java.io.Serializable;
+
+public enum EyeColor implements Serializable {
+    BLUE("blue"), BROWN("brown"), GREEN("green");
+
+    EyeColor(String name){
+        this.name = name;
+    }
+    String name;
+}
